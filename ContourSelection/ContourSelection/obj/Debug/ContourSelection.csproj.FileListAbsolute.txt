@@ -1,0 +1,7 @@
+C:\Programming\C#\CG3\ContourSelection\ContourSelection\bin\Debug\ContourSelection.exe.config
+C:\Programming\C#\CG3\ContourSelection\ContourSelection\bin\Debug\ContourSelection.exe
+C:\Programming\C#\CG3\ContourSelection\ContourSelection\bin\Debug\ContourSelection.pdb
+C:\Programming\C#\CG3\ContourSelection\ContourSelection\obj\Debug\ContourSelection.Properties.Resources.resources
+C:\Programming\C#\CG3\ContourSelection\ContourSelection\obj\Debug\ContourSelection.csproj.GenerateResource.Cache
+C:\Programming\C#\CG3\ContourSelection\ContourSelection\obj\Debug\ContourSelection.exe
+C:\Programming\C#\CG3\ContourSelection\ContourSelection\obj\Debug\ContourSelection.pdb
