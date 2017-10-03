@@ -2,6 +2,8 @@
 #include <vector>
 #include <cmath>
 
+#include <iostream>
+
 using std::vector;
 
 vector<vector<QColor>> readImage(QString in_filename){
@@ -75,7 +77,7 @@ struct Point{
 };
 
 inline bool Equal(QColor c1, QColor c2){
-    int Epsilon = 20;
+    int Epsilon = 15;
     if (abs(c1.green() - c2.green()) > Epsilon)
         return false;
     if (abs(c1.red() - c2.red()) > Epsilon)
@@ -125,8 +127,6 @@ void Draw(vector<vector<QColor>>& img, int w, int h, QColor oldColor, QColor new
         }
     }
 
-    sizes.clear();
-
     point.x = w;
     point.y=h;
     sizes.push_back(point);
@@ -174,78 +174,89 @@ void Draw(vector<vector<QColor>>& img, vector<vector<QColor>>& img2,  int w, int
     Point point(w,h);
     sizes.push_back(point);
 
-    while (pos < sizes.size()){
-        point = sizes[pos++];
-        int y1 = point.y;
 
-        if (Equal (img[point.x][y1], img2[point.x % img2.size()][y1 % img2[point.x % img2.size()].size()]))
-            continue;
+    int img2W = img2.size() - 1;
+    int img2H = img2[0].size() -1 ;
+    size_t oldPos=0;
 
-        while (y1 >= 0 && Equal(img[point.x][y1], oldColor)) { y1 = y1 - 1; }
-        y1 = y1 + 1;
-        int spanLeft = 0;
-        int spanRight = 0;
-        while (y1 < img[point.x].size() && Equal(img[point.x][y1] , oldColor)) {
-            img[point.x][y1] = img2[point.x % img2.size()][y1 % img2[point.x % img2.size()].size()];
+    while (pos == 0 || oldPos < sizes.size()) {
+        pos = oldPos;
+        while (pos < sizes.size()){
+            point = sizes[pos++];
+            int y1 = point.y;
 
-            if (spanLeft == 0 && point.x > 0 && Equal(img[point.x-1][y1], oldColor)) {
-                sizes.push_back(Point(point.x-1, y1));
-                spanLeft = 1;
-            }
-            if (spanLeft == 1 && point.x > 0 && !Equal(img[point.x-1][y1],oldColor)) {
-                spanLeft = 0;
-            }
+            if (img[point.x][y1] == img2[point.x % img2W + 1] [ y1 % img2H +1 ])
+            //if (Equal (img[point.x][y1], QColor(0,0,0)))
+                continue;
 
-
-            if (spanRight == 0 && point.x < (img.size()-1) && Equal(img[point.x+1][y1], oldColor)) {
-                sizes.push_back(Point(point.x+1, y1));
-                spanRight= 1;
-            }            if (spanRight == 1 && point.x < (img.size()-1) && !Equal(img[point.x+1][y1], oldColor)) {
-                spanRight = 0;
-            }
+            while (y1 >= 0 && Equal(img[point.x][y1], oldColor)) { y1 = y1 - 1; }
             y1 = y1 + 1;
+            int spanLeft = 0;
+            int spanRight = 0;
+            while (y1 < img[point.x].size() && Equal(img[point.x][y1], oldColor)) {
+                img[point.x][y1] = img2[point.x % img2W +1 ][ y1 % img2H +1 ];
+                //img[point.x][y1] = QColor(0,0,0);
+
+                if (spanLeft == 0 && point.x > 0 && Equal(img[point.x-1][y1], oldColor)) {
+                    sizes.push_back(Point(point.x-1, y1));
+                    spanLeft = 1;
+                }
+                if (spanLeft == 1 && point.x > 0 && ! Equal(img[point.x-1][y1], oldColor)) {
+                    spanLeft = 0;
+                }
+
+
+                if (spanRight == 0 && point.x < (img.size()-1) && Equal(img[point.x+1][y1], oldColor)) {
+                    sizes.push_back(Point(point.x+1, y1));
+                    spanRight= 1;
+                }
+                if (spanRight == 1 && point.x < (img.size()-1) && !Equal(img[point.x+1][y1], oldColor)) {
+                    spanRight = 0;
+                }
+                y1 = y1 + 1;
+            }
         }
-    }
 
-    sizes.clear();
+        point.x = w;
+        point.y=h;
+        sizes.push_back(point);
+        int tmpPos = oldPos;
+        oldPos = pos+1;
+        pos=tmpPos;
 
-    point.x = w;
-    point.y=h;
-    sizes.push_back(point);
-    pos=0;
+        while (pos < sizes.size()){
+            point = sizes[pos++];
+            int y1 = point.x;
 
-    while (pos < sizes.size()){
-        point = sizes[pos++];
-        int y1 = point.x;
-
-        if (Equal(img[y1][point.y], img2[y1 % img2.size()][ point.y % img2[y1 % img2.size()].size()]))
-            continue;
-
-
-        while (y1 >= 0 && Equal(img[y1][point.y], oldColor)) { y1 = y1 - 1; }
-        y1 = y1 + 1;
-        int spanLeft = 0;
-        int spanRight = 0;
-        while (y1 < img.size() && Equal(img[y1][point.y], oldColor)) {
-            img[y1][point.y] = img2[y1 % img2.size()][ point.y % img2[y1 % img2.size()].size()];
-
-            if (spanLeft == 0 && point.y > 0 && Equal(img[y1][point.y-1], oldColor)) {
-                sizes.push_back(Point(y1, point.y-1));
-                spanLeft = 1;
-            }
-            if (spanLeft == 1 && point.y > 0 && !Equal(img[y1][point.y-1], oldColor)) {
-                spanLeft = 0;
-            }
+            if (Equal(img[y1][point.y], img2[y1 %img2W][ point.y % img2H]))
+                continue;
 
 
-            if (spanRight == 0 && point.y < (img[point.x].size()-1) && Equal(img[y1][point.y+1], oldColor)) {
-                sizes.push_back(Point(y1, point.y+1));
-                spanRight= 1;
-            }
-            if (spanRight == 1 && point.y < (img[point.x].size()-1) && !Equal(img[y1][point.y+1], oldColor)) {
-                spanRight = 0;
-            }
+            while (y1 >= 0 && Equal(img[y1][point.y], oldColor)) { y1 = y1 - 1; }
             y1 = y1 + 1;
+            int spanLeft = 0;
+            int spanRight = 0;
+            while (y1 < img.size() && Equal(img[y1][point.y], oldColor)) {
+                img[y1][point.y] = img2[y1 % img2W][ point.y % img2H];
+
+                if (spanLeft == 0 && point.y > 0 && Equal(img[y1][point.y-1], oldColor)) {
+                    sizes.push_back(Point(y1, point.y-1));
+                    spanLeft = 1;
+                }
+                if (spanLeft == 1 && point.y > 0 && !Equal(img[y1][point.y-1], oldColor)) {
+                    spanLeft = 0;
+                }
+
+
+                if (spanRight == 0 && point.y < (img[point.x].size()-1) && Equal(img[y1][point.y+1], oldColor)) {
+                    sizes.push_back(Point(y1, point.y+1));
+                    spanRight= 1;
+                }
+                if (spanRight == 1 && point.y < (img[point.x].size()-1) && !Equal(img[y1][point.y+1], oldColor)) {
+                    spanRight = 0;
+                }
+                y1 = y1 + 1;
+            }
         }
     }
 }
@@ -330,13 +341,18 @@ void Canvas::mousePressEvent(QMouseEvent *event) {
         m_isKeyPressed = true;
     }
     if (_lock && event->button() == Qt::LeftButton){
-        Save("tmp.jpg");
-        QPointF pos = mapToScene(event->pos());
-        QPoint t = pos.toPoint();
+        //Save("tmp.jpg");
+        QImage newImage(size(),QImage::Format_RGB32);
+        QPainter painter(&newImage);
+
+        m_scene.render(&painter);
+        newImage.save("tmp.jpg");
+
+        QColor tmpC=newImage.pixel(event->pos().rx(), event->pos().ry());
         if (file_name == "")
-            FullDraw("tmp.jpg", "tmp.out.jpg", t.x(), t.y(), _c, _c_draw);
+            FullDraw("tmp.jpg", "tmp.out.jpg", event->pos().rx(), event->pos().ry(), tmpC, _c_draw);
         else
-            FullDraw2("tmp.jpg",file_name, "tmp.out.jpg", t.x(), t.y(), _c, _c_draw);
+            FullDraw2("tmp.jpg",file_name, "tmp.out.jpg", event->pos().rx(), event->pos().ry(), tmpC, _c_draw);
         emit Success("tmp.out.jpg");
     }
 }
